@@ -1,16 +1,16 @@
 # AD Free English Movie Center (mostly for Georgians)
 
-### first look
+## First look
 
-**landing page**  
+**Landing page**  
 ![landing page](./images/movies.jpg)  
 
-**each movie**  
+**Each movie**  
 ![movie](./images/movie.jpg)
 
 ---
 
-### get started
+### Get started
 
 ```sh
 git clone https://github.com/Ka10ken1/mykadri-scraper
@@ -23,7 +23,7 @@ docker compose up --build
 
 ---
 
-### overview
+### Overview
 
 ```
 mykadri-scraper/
