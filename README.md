@@ -2,9 +2,10 @@
 
 ### first look
 
-*landing page*  
+**landing page**  
 ![landing page](./images/movies.jpg)  
-*each movie*  
+
+**each movie**  
 ![movie](./images/movie.jpg)
 
 ---
