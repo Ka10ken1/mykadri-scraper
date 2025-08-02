@@ -1,4 +1,4 @@
-# AD Free English Movie Center (mostly for Georgians)
+# AD Free English Movie Center
 
 ## First look
 
