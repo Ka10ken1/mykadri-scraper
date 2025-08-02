@@ -1,16 +1,49 @@
 package main
 
 import (
-    "log"
-    "os"
-    "github.com/Ka10ken1/mykadri-scraper/internal/models"
-    "github.com/Ka10ken1/mykadri-scraper/internal/scraper"
-    "github.com/Ka10ken1/mykadri-scraper/internal/tui"
-    "github.com/joho/godotenv"
+	"context"
+	"log"
+	"net"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/Ka10ken1/mykadri-scraper/internal/api"
+	"github.com/Ka10ken1/mykadri-scraper/internal/models"
+	"github.com/Ka10ken1/mykadri-scraper/internal/scraper"
+	"github.com/joho/godotenv"
 )
+
+func createHTTPClientWithCustomDNS() *http.Client {
+    resolver := &net.Resolver{
+        PreferGo: true,
+        Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+            d := net.Dialer{
+                Timeout: time.Second * 2,
+            }
+            return d.DialContext(ctx, network, "1.1.1.1:53")
+        },
+    }
+
+    dialer := &net.Dialer{
+        Resolver: resolver,
+        Timeout:  5 * time.Second,
+    }
+
+    transport := &http.Transport{
+        DialContext: dialer.DialContext,
+    }
+
+    return &http.Client{
+        Transport: transport,
+        Timeout:   10 * time.Second,
+    }
+}
 
 
 func main() {
+
+    client := createHTTPClientWithCustomDNS()
 
     if err := godotenv.Load(); err != nil {
 	log.Println("No .env file found, using default env vars")
@@ -28,7 +61,7 @@ func main() {
 	log.Fatalf("Failed to create text index: %v", err)
     }
 
-    movies, err := scraper.ScrapeMovies()
+    movies, err := scraper.ScrapeMovies(client)
     if err != nil {
 	log.Fatal(err)
     }
@@ -41,6 +74,8 @@ func main() {
 	log.Println("No new movies to insert, skipping DB insert.")
     }
 
-    tui.Run()
+    api.RunServer()
+
+
 }
 

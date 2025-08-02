@@ -1,17 +1,17 @@
 package scraper
 
 import (
-	"context"
 	"fmt"
+	"io"
 	"log"
-	"net"
 	"net/http"
 	"regexp"
 	"sync"
 	"time"
+
 	"github.com/Ka10ken1/mykadri-scraper/internal/models"
-	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/extensions"
+	"github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2/extensions"
 )
 
 type Movie = models.Movie
@@ -24,7 +24,7 @@ const (
 )
 
 
-func ScrapeMovies() ([]Movie, error) {
+func ScrapeMovies(client *http.Client) ([]Movie, error) {
 	alreadyScraped, err := models.HasMovies()
 	if err != nil {
 		return nil, fmt.Errorf("db check error: %w", err)
@@ -44,7 +44,7 @@ func ScrapeMovies() ([]Movie, error) {
 		seen[link] = struct{}{}
 	}
 
-	c := setupCollector()
+	c := setupCollector(client)
 
 	var mu sync.Mutex
 	var movies []Movie
@@ -52,6 +52,16 @@ func ScrapeMovies() ([]Movie, error) {
 	c.OnHTML("div.post.post-t1", func(e *colly.HTMLElement) {
 		movie := parseMovie(e)
 		log.Printf("Found movie: %s (%s)", movie.Title, movie.Year)
+
+		videoURL, err := scrapeVideoURL(client, movie.Link)
+
+		if err != nil || videoURL == "" {
+			log.Printf("Warning: could not get video URL for %s: %v", movie.Title, err)
+			return 
+		}
+		
+		movie.VideoURL = videoURL
+
 		mu.Lock()
 		if _, found := seen[movie.Link]; !found {
 			movies = append(movies, movie)
@@ -65,20 +75,36 @@ func ScrapeMovies() ([]Movie, error) {
 		log.Println("Visiting", r.URL.String())
 	})
 
+
 	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Request to %s failed with status %d: %v", r.Request.URL, r.StatusCode, err)
+		if r != nil && r.StatusCode == 429 {
+			log.Printf("Error 429 on %s, skipping...", r.Request.URL)
+		} else if r != nil {
+			log.Printf("Request error on %s: %v", r.Request.URL, err)
+		} else {
+			log.Printf("Request error: %v", err)
+		}
+	})
+
+	c.OnResponse(func(r *colly.Response) {
+		if r.StatusCode == 429 {
+			log.Printf("Received 429 on %s, skipping...", r.Request.URL)
+		}
 	})
 
 
 	err = c.Limit(&colly.LimitRule{
 		DomainGlob:  "mykadri.tv",
-		Parallelism: 10,
+		Parallelism: 2,
 		Delay:       500 * time.Millisecond,
 		RandomDelay: 200 * time.Microsecond,
 	})
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to set rate limit: %w", err)
+		return nil, err
 	}
+
+	
 
 	baseURL := "https://mykadri.tv/filmebi_qartulad/page/%d/"
 	maxPages := 332
@@ -101,27 +127,19 @@ func ScrapeMovies() ([]Movie, error) {
 }
 
 
-func setupCollector() *colly.Collector {
+func setupCollector(client *http.Client) *colly.Collector {
 	c := colly.NewCollector(
 		colly.AllowedDomains("mykadri.tv", "www.mykadri.tv"),
 		colly.Async(true),
 	)
 
-	transport := &http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			Resolver: &net.Resolver{
-				PreferGo: true,
-				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-					d := net.Dialer{}
-					return d.DialContext(ctx, "tcp4", "8.8.8.8:53")
-				},
-			},
-		}).DialContext,
-	}
+	c.SetClient(client)
 
-	c.WithTransport(transport)
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+		r.Headers.Set("Accept-Language", "en-US,en;q=0.5")
+	})
+
 	extensions.RandomUserAgent(c)
 	extensions.Referer(c)
 
@@ -155,5 +173,34 @@ func parseMovie(e *colly.HTMLElement) Movie {
 		Link:  link,
 		Image: imgURL,
 	}
+}
+
+func scrapeVideoURL(client *http.Client, moviePageURL string) (string, error) {
+
+	resp, err := client.Get(moviePageURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to GET page: %w", err)
+	}
+	defer resp.Body.Close()
+
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("bad status code: %d", resp.StatusCode)
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read body: %w", err)
+	}
+	body := string(bodyBytes)
+
+	re := regexp.MustCompile(`data-lazy="(https://vidsrc\.me/embed/movie\?imdb=tt\d+)"`)
+	matches := re.FindStringSubmatch(body)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("video URL not found in HTML")
+	}
+	url := matches[1]
+	return url, nil
+
 }
 

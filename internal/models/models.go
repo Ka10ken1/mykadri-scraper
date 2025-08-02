@@ -6,16 +6,25 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 
 type Movie struct {
-    Title string `bson:"title"`
-    Year  string `bson:"year"`
-    Link  string `bson:"link"`
-    Image string `bson:"image"`
+    Title    string `bson:"title"`
+    Year     string `bson:"year"`
+    Link     string `bson:"link"`     
+    Image    string `bson:"image"`
+    VideoURL string `bson:"videoUrl"` 
+}
+
+
+type MovieImage struct {
+    ID    primitive.ObjectID `bson:"_id" json:"id"`
+    Title string             `bson:"title"`
+    Image string             `bson:"image" json:"image"`
 }
 
 
@@ -57,6 +66,91 @@ func InsertMovies(movies []Movie) error {
 
     _, err := movieCollection.InsertMany(ctx, docs)
     return err
+}
+
+
+func GetAllMovies() ([]Movie, error) {
+     if movieCollection == nil {
+        return nil, mongo.ErrClientDisconnected
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+    defer cancel()
+
+    cursor, err := movieCollection.Find(ctx, bson.M{})
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+
+    var movies []Movie
+    for cursor.Next(ctx) {
+        var m Movie
+        if err := cursor.Decode(&m); err != nil {
+            return nil, err
+        }
+        movies = append(movies, m)
+    }
+
+    if err := cursor.Err(); err != nil {
+        return nil, err
+    }
+
+    return movies, nil
+}
+
+func GetAllMovieImages() ([]MovieImage, error) {
+    if movieCollection == nil {
+        return nil, mongo.ErrClientDisconnected
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    opts := options.Find().SetProjection(bson.M{
+        "image": 1,
+        "title": 1,
+    })
+
+    cursor, err := movieCollection.Find(ctx, bson.M{}, opts)
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+
+    var images []MovieImage
+    for cursor.Next(ctx) {
+        var mi MovieImage
+        if err := cursor.Decode(&mi); err != nil {
+            return nil, err
+        }
+        images = append(images, mi)
+    }
+
+    return images, nil
+}
+
+
+func GetMovieByID(idStr string) (*Movie, error) {
+    if movieCollection == nil {
+        return nil, mongo.ErrClientDisconnected
+    }
+
+    id, err := primitive.ObjectIDFromHex(idStr)
+    if err != nil {
+        return nil, err // invalid hex id
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    var movie Movie
+    err = movieCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&movie)
+    if err != nil {
+        return nil, err
+    }
+
+    return &movie, nil
 }
 
 func GetAllMovieLinks() ([]string, error) {

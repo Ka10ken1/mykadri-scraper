@@ -1,0 +1,30 @@
+# Binaries
+scraper
+
+# Dependency directories
+vendor/
+
+# Build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go cache
+*.log
+*.tmp
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Env and config
+.env
+
+# Git
+.git
+.gitignore
+

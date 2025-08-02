@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{ .Title }} ({{ .Year }})</title>
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace;
+            background: #0c0c0c;
+            color: #00ff00;
+            padding: 20px;
+            line-height: 1.4;
+            min-height: 100vh;
+        }
+        
+        .terminal {
+            max-width: 120ch;
+            margin: 0 auto;
+            background: #000000;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .terminal-header {
+            background: #2d2d2d;
+            border-bottom: 1px solid #555555;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #cccccc;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .terminal-title {
+            font-weight: 400;
+        }
+        
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: #888888;
+        }
+        
+        .terminal-content {
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .prompt::before {
+            content: "user@cinema:~$ ";
+            color: #0080ff;
+        }
+        
+        .output {
+            margin: 10px 0;
+        }
+        
+        .title {
+            color: #ffff00;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+        
+        .year {
+            color: #888888;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin: 20px 0;
+            border-left: 3px solid #333333;
+            padding-left: 15px;
+        }
+        
+        .section-title {
+            color: #00ffff;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .ascii-frame {
+            border: 1px solid #333333;
+            padding: 10px;
+            margin: 15px 0;
+            background: #111111;
+        }
+        
+        .poster-placeholder {
+            color: #666666;
+            text-align: center;
+            padding: 40px 20px;
+            border: 1px dashed #333333;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .video-frame {
+            border: 1px solid #00ff00;
+            background: #111111;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .video-header {
+            background: #1a1a1a;
+            padding: 8px 15px;
+            border-bottom: 1px solid #333333;
+            color: #00ff00;
+            font-size: 12px;
+        }
+        
+        .media-container {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .poster-section {
+            flex: 0 0 300px;
+        }
+        
+        .video-section {
+            flex: 1;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            display: block;
+            background: #000000;
+        }
+        
+        .status {
+            color: #ff6b6b;
+            font-style: italic;
+        }
+        
+        .cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .info-line {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        
+        .info-label {
+            color: #888888;
+            display: inline;
+        }
+        
+        .info-value {
+            color: #ffffff;
+            display: inline;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .terminal {
+                max-width: 100%;
+            }
+            
+            .terminal-content {
+                padding: 15px;
+                font-size: 12px;
+            }
+            
+            .title {
+                font-size: 16px;
+            }
+            
+            .media-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .poster-section {
+                flex: none;
+            }
+            
+            iframe {
+                height: 250px;
+            }
+        }
+        </style>
+    </head>
+    <body>
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <span>cinema-viewer v1.0.0</span>
+            </div>
+            
+            <div class="terminal-content">
+                <div class="prompt">movie --info "{{ .Title }}"</div>
+                
+                <div class="output">
+                    <div class="section">
+                        <div class="title">{{ .Title }}</div>
+                        <div class="year">[{{ .Year }}]</div>
+                        
+                        <div class="info-line">
+                            <span class="info-label">STATUS:</span> <span class="info-value">LOADED</span>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">TYPE:</span> <span class="info-value">MOTION_PICTURE</span>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-label">YEAR:</span> <span class="info-value">{{ .Year }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="media-container">
+                        <div class="poster-section">
+                            <div class="section-title">[POSTER]</div>
+                            <div class="ascii-frame">
+                                <img src="{{ .Image }}" alt="{{ .Title }}" style="width: 100%; filter: contrast(1.2);" />
+                            </div>
+                        </div>
+                        
+                        <div class="video-section">
+                            <div class="section-title">[VIDEO_STREAM]</div>
+                            {{ if .VideoURL }}
+                            <div class="video-frame">
+                                <div class="video-header">
+                                    ● REC | STREAMING: {{ .VideoURL }}
+                                </div>
+                                <iframe src="{{ .VideoURL }}" allowfullscreen></iframe>
+                            </div>
+                            {{ else }}
+                            <div class="ascii-frame">
+                                <div class="status">
+                                    ERROR: Video stream unavailable<br>
+                                    STATUS: OFFLINE<br>
+                                    CODE: 404_NOT_FOUND
+                                </div>
+                            </div>
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prompt">
+                    <span class="cursor">█</span>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
