@@ -63,3 +63,19 @@ func ShowMoviePage(c *gin.Context) {
 	})
 }
 
+func GetMoviesByTitle(c *gin.Context) {
+	query := c.Query("q")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "query parameter 'q' is required"})
+		return
+	}
+
+	movies, err := models.SearchMoviesByTitle(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to search movies"})
+		return
+	}
+
+	c.JSON(http.StatusOK, movies)
+}
+

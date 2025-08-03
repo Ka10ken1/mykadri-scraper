@@ -13,6 +13,7 @@ func RunServer() {
 	r.GET("/movies", GetMovies)
 	r.GET("/movies/:id", GetMovieByID)
 	r.GET("/movie-images", GetMovieImages)
+	r.GET("/search", GetMoviesByTitle)
 
 	r.Static("/static", "./web")
 

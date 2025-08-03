@@ -207,19 +207,17 @@ func HasMovies() (bool, error) {
 }
 
 func EnsureTextIndex() error {
-    if movieCollection == nil {
-	return mongo.ErrClientDisconnected
-    }
+	if movieCollection == nil {
+		return mongo.ErrClientDisconnected
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-
-    mod := mongo.IndexModel{
-	Keys: bson.D{{Key: "title", Value: "text"}}, // text index on "title"
-    }
-
-    _, err := movieCollection.Indexes().CreateOne(ctx, mod)
-    return err
+	index := mongo.IndexModel{
+		Keys: bson.D{{Key: "title", Value: "text"}},
+	}
+	_, err := movieCollection.Indexes().CreateOne(ctx, index)
+	return err
 }
 
 func SearchMoviesByTitle(query string) ([]Movie, error) {

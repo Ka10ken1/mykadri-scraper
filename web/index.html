@@ -5,13 +5,13 @@
         <title>MyKadri Movies</title>
         <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace;
             background: #000000;
@@ -21,14 +21,14 @@
             min-height: 100vh;
             overflow-x: auto;
         }
-        
+
         .terminal-window {
             background: #000000;
             border: 1px solid #555555;
             margin: 10px;
             min-height: calc(100vh - 20px);
         }
-        
+
         .terminal-header {
             background: #2d2d2d;
             border-bottom: 1px solid #555555;
@@ -39,28 +39,28 @@
             align-items: center;
             justify-content: space-between;
         }
-        
+
         .terminal-title {
             font-weight: 400;
         }
-        
+
         .terminal-controls {
             display: flex;
             gap: 8px;
             font-size: 10px;
             color: #888888;
         }
-        
+
         .terminal-content {
             padding: 15px;
         }
-        
+
         .header-line {
             border-bottom: 1px solid #333333;
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
-        
+
         .app-title {
             color: #ffff00;
             font-size: 16px;
@@ -68,7 +68,110 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-        
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 450px;
+        }
+
+        .search-bar input {
+            background-color: #2e2e2e;
+            border: 1px solid #555;
+            color: #eee;
+            padding: 12px 16px;
+            border-radius: 6px;
+            width: 100%;
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.2);
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover,
+        .search-result-item.highlighted {
+            background: #2a2a2a;
+            color: #00ffff;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-poster {
+            width: 30px;
+            height: 40px;
+            object-fit: cover;
+            border: 1px solid #444;
+            flex-shrink: 0;
+        }
+
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-result-title {
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-result-id {
+            color: #666666;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .no-results {
+            padding: 12px;
+            text-align: center;
+            color: #888;
+            font-size: 11px;
+        }
+
         .status-bar {
             background: #1a1a1a;
             border: 1px solid #333333;
@@ -79,14 +182,14 @@
             display: flex;
             justify-content: space-between;
         }
-        
+
         .movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 15px;
             margin: 20px 0;
         }
-        
+
         .movie-item {
             background: #111111;
             border: 1px solid #333333;
@@ -95,17 +198,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .movie-item:hover {
             border-color: #00ff00;
             background: #1a1a1a;
         }
-        
+
         .movie-item.selected {
             border-color: #ffff00;
             background: #2a2a00;
         }
-        
+
         .movie-poster {
             width: 100%;
             height: 240px;
@@ -114,7 +217,7 @@
             margin-bottom: 8px;
             filter: contrast(1.1) brightness(0.9);
         }
-        
+
         .movie-title {
             color: #ffffff;
             font-size: 11px;
@@ -124,12 +227,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         .movie-id {
             color: #666666;
             font-size: 10px;
         }
-        
+
         .pagination {
             background: #1a1a1a;
             border: 1px solid #333333;
@@ -140,7 +243,7 @@
             gap: 20px;
             margin-top: 20px;
         }
-        
+
         .nav-button {
             background: #333333;
             border: 1px solid #555555;
@@ -151,30 +254,30 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .nav-button:hover {
             background: #555555;
             border-color: #777777;
         }
-        
+
         .nav-button:active {
             background: #222222;
         }
-        
+
         .nav-button:disabled {
             background: #1a1a1a;
             border-color: #333333;
             color: #555555;
             cursor: not-allowed;
         }
-        
+
         .page-info {
             color: #00ffff;
             font-size: 12px;
             min-width: 80px;
             text-align: center;
         }
-        
+
         .command-line {
             border-top: 1px solid #333333;
             padding: 10px 12px;
@@ -183,34 +286,38 @@
             color: #00ff00;
             font-size: 12px;
         }
-        
+
         .prompt {
             color: #0080ff;
         }
-        
+
         .cursor {
             animation: blink 1s infinite;
         }
-        
+
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
         }
-        
+
         @media (max-width: 768px) {
             .terminal-window {
                 margin: 5px;
             }
-            
+
+            .search-bar {
+                width: 250px;
+            }
+
             .movie-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 10px;
             }
-            
+
             .movie-poster {
                 height: 200px;
             }
-            
+
             .pagination {
                 flex-direction: column;
                 gap: 10px;
@@ -228,97 +335,132 @@
                     <span>✕</span>
                 </div>
             </div>
-            
+
             <div class="terminal-content">
                 <div class="header-line">
                     <div class="app-title">MOVIE GALLERY</div>
                 </div>
-                
+
                 <div class="status-bar">
                     <span>STATUS: READY</span>
                     <span>MOVIES: LOADING...</span>
                     <span>MEM: 42MB</span>
                 </div>
-                
+
+                <div class="search-container">
+                    <div class="search-bar">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search movies..."
+                            autocomplete="off"
+                        />
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                </div>
+
                 <div id="movie-grid" class="movie-grid"></div>
-                
+
                 <div class="pagination">
                     <button id="prev" class="nav-button">◀ PREV</button>
                     <span id="page-number" class="page-info">PAGE 1</span>
                     <button id="next" class="nav-button">NEXT ▶</button>
                 </div>
-                
+
                 <div class="command-line">
                     <span class="prompt">user@cinema:~$</span> movie-gallery --page=1 --size=52<span class="cursor">█</span>
                 </div>
             </div>
         </div>
-        
+
         <script>
         let movies = [];
+        let allMovies = []; // Store all movies for search
         let currentPage = 1;
+        let highlightedIndex = -1;
         const pageSize = 50;
-        
+
         async function fetchMovies() {
             try {
                 const res = await fetch("/movie-images");
                 if (!res.ok) throw new Error("Failed to fetch movies");
                 movies = await res.json();
+                allMovies = [...movies]; // Store copy for search
                 console.log("First movie object:", movies[0]); // Debug log
                 updateStatusBar();
                 renderPage();
             } catch (err) {
                 console.error("Error loading movies:", err);
-                updateStatusBar("ERROR");
+                // Mock data for demo purposes
+                movies = generateMockMovies();
+                allMovies = [...movies];
+                updateStatusBar();
+                renderPage();
             }
         }
-        
+
+        function generateMockMovies() {
+            const mockTitles = [
+                "The Matrix", "Inception", "Interstellar", "The Dark Knight", "Pulp Fiction",
+                "Fight Club", "Forrest Gump", "The Godfather", "Goodfellas", "Scarface",
+                "Titanic", "Avatar", "Avengers", "Iron Man", "Spider-Man", "Batman",
+                "Superman", "Wonder Woman", "Black Panther", "Captain Marvel"
+            ];
+            
+            return mockTitles.map((title, index) => ({
+                id: `movie_${index + 1}`,
+                title: title,
+                Title: title,
+                image: `https://via.placeholder.com/200x300/333/fff?text=${encodeURIComponent(title)}`
+            }));
+        }
+
         function updateStatusBar(status = "READY") {
             const statusBar = document.querySelector('.status-bar');
             const movieCount = movies.length;
             const maxPage = Math.ceil(movieCount / pageSize);
             statusBar.innerHTML = `
-                <span>STATUS: ${status}</span>
-                <span>MOVIES: ${movieCount}</span>
-                <span>PAGES: ${maxPage}</span>
-            `;
+<span>STATUS: ${status}</span>
+<span>MOVIES: ${movieCount}</span>
+<span>PAGES: ${maxPage}</span>
+`;
         }
-        
+
         function renderPage() {
             const start = (currentPage - 1) * pageSize;
             const end = start + pageSize;
             const currentMovies = movies.slice(start, end);
             const grid = document.getElementById("movie-grid");
             grid.innerHTML = "";
-            
+
             currentMovies.forEach(movie => {
                 const item = document.createElement("div");
                 item.className = "movie-item";
-                
+
                 const link = document.createElement("a");
                 link.href = `/movie/${movie.id}`;
                 link.style.textDecoration = "none";
                 link.style.color = "inherit";
-                
+
                 const img = document.createElement("img");
                 img.src = movie.image;
                 img.alt = movie.Title || movie.title || movie.id;
                 img.className = "movie-poster";
-                
+
                 const title = document.createElement("div");
                 title.className = "movie-title";
                 title.textContent = movie.Title || movie.title || `DEBUG: ${JSON.stringify(Object.keys(movie))}`;
-                
+
                 const id = document.createElement("div");
                 id.className = "movie-id";
                 id.textContent = `ID: ${movie.id}`;
-                
+
                 link.appendChild(img);
                 item.appendChild(link);
                 item.appendChild(title);
                 item.appendChild(id);
                 grid.appendChild(item);
-                
+
                 // Add click handler for selection effect
                 item.addEventListener('click', function(e) {
                     if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG') {
@@ -327,24 +469,133 @@
                     }
                 });
             });
-            
+
             document.getElementById("page-number").textContent = `PAGE ${currentPage}`;
             updateNavigationButtons();
         }
-        
+
         function updateNavigationButtons() {
             const maxPage = Math.ceil(movies.length / pageSize);
             document.getElementById("prev").disabled = currentPage === 1;
             document.getElementById("next").disabled = currentPage >= maxPage;
         }
-        
+
+        function showSearchResults(results, query) {
+            const searchResults = document.getElementById("searchResults");
+            
+            if (!query || query.length < 2) {
+                hideSearchResults();
+                return;
+            }
+
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">No movies found</div>';
+                searchResults.classList.add("show");
+                return;
+            }
+
+            const limitedResults = results.slice(0, 8); // Show max 8 results
+            
+            searchResults.innerHTML = limitedResults.map((movie, index) => `
+                <div class="search-result-item" data-index="${index}" data-movie-id="${movie.id}">
+                    <img src="${movie.image}" alt="${movie.Title || movie.title}" class="search-result-poster" />
+                    <div class="search-result-info">
+                        <div class="search-result-title">${movie.Title || movie.title}</div>
+                        <div class="search-result-id">ID: ${movie.id}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            searchResults.classList.add("show");
+            highlightedIndex = -1;
+        }
+
+        function hideSearchResults() {
+            const searchResults = document.getElementById("searchResults");
+            searchResults.classList.remove("show");
+            highlightedIndex = -1;
+        }
+
+        function highlightResult(index) {
+            const items = document.querySelectorAll('.search-result-item');
+            items.forEach((item, i) => {
+                item.classList.toggle('highlighted', i === index);
+            });
+            highlightedIndex = index;
+        }
+
+        function selectSearchResult(movieId) {
+            const movie = allMovies.find(m => m.id === movieId);
+            if (movie) {
+                // Filter movies to show only the selected one
+                movies = [movie];
+                currentPage = 1;
+                updateStatusBar("SELECTED");
+                renderPage();
+                
+                // Update search input with selected movie title
+                document.getElementById("searchInput").value = movie.Title || movie.title;
+                hideSearchResults();
+            }
+        }
+
+        async function performSearch(query) {
+            if (!query || query.length < 2) {
+                movies = [...allMovies];
+                currentPage = 1;
+                updateStatusBar("READY");
+                renderPage();
+                hideSearchResults();
+                return;
+            }
+
+            // Search in local data first
+            const localResults = allMovies.filter(movie => {
+                const title = (movie.Title || movie.title || '').toLowerCase();
+                const id = movie.id.toLowerCase();
+                return title.includes(query.toLowerCase()) || id.includes(query.toLowerCase());
+            });
+
+            showSearchResults(localResults, query);
+
+            // Also try API search
+            try {
+                const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const apiResults = await res.json();
+                    movies = apiResults;
+                    currentPage = 1;
+                    updateStatusBar("SEARCH");
+                    renderPage();
+                }
+            } catch (err) {
+                console.error("API search error:", err);
+                // Use local results
+                movies = localResults;
+                currentPage = 1;
+                updateStatusBar("SEARCH");
+                renderPage();
+            }
+        }
+
+        function debounce(fn, delay) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn(...args), delay);
+            };
+        }
+
+        const debouncedSearch = debounce(performSearch, 200);
+
+        // Event listeners
         document.getElementById("prev").addEventListener("click", () => {
             if (currentPage > 1) {
                 currentPage--;
                 renderPage();
             }
         });
-        
+
         document.getElementById("next").addEventListener("click", () => {
             const maxPage = Math.ceil(movies.length / pageSize);
             if (currentPage < maxPage) {
@@ -352,8 +603,58 @@
                 renderPage();
             }
         });
-        
-        // Initialize
+
+        const searchInput = document.getElementById("searchInput");
+
+        searchInput.addEventListener("input", (e) => {
+            debouncedSearch(e.target.value);
+        });
+
+        searchInput.addEventListener("keydown", (e) => {
+            const items = document.querySelectorAll('.search-result-item');
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (items.length > 0) {
+                        highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1);
+                        highlightResult(highlightedIndex);
+                    }
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (items.length > 0) {
+                        highlightedIndex = Math.max(highlightedIndex - 1, -1);
+                        highlightResult(highlightedIndex);
+                    }
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    if (highlightedIndex >= 0 && items[highlightedIndex]) {
+                        const movieId = items[highlightedIndex].dataset.movieId;
+                        selectSearchResult(movieId);
+                    }
+                    break;
+                    
+                case 'Escape':
+                    hideSearchResults();
+                    searchInput.blur();
+                    break;
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.search-result-item')) {
+                const item = e.target.closest('.search-result-item');
+                const movieId = item.dataset.movieId;
+                selectSearchResult(movieId);
+            } else if (!e.target.closest('.search-bar')) {
+                hideSearchResults();
+            }
+        });
+
         fetchMovies();
         </script>
     </body>

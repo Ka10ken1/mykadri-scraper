@@ -61,4 +61,3 @@ document.getElementById("next").addEventListener("click", () => {
 });
 
 fetchMovies();
-
