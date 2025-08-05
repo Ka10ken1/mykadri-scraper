@@ -1,12 +1,15 @@
-# AD Free English Movie Center
+# AD Free English Movie and TV series Center
 
 ## First look
 
 **Landing page**  
-![landing page](./images/movies.jpg)  
+![landing page](./images/landing.jpg)  
+
+**Series**
+![series](./images/series.jpg)
 
 **Each movie**  
-![movie](./images/movie.jpg)
+![movie](./images/luther.jpg)
 
 ---
 
