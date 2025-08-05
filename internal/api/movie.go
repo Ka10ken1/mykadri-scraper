@@ -56,10 +56,11 @@ func ShowMoviePage(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "movie.html", gin.H{
-		"Title":    movie.Title,
-		"VideoURL": movie.VideoURL,
-		"Image":    movie.Image,
-		"Year":     movie.Year,
+		"Title":        movie.Title,
+		"EnglishTitle": movie.TitleEnglish,
+		"VideoURL":     movie.VideoURL,
+		"Image":        movie.Image,
+		"Year":         movie.Year,
 	})
 }
 

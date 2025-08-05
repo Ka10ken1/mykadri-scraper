@@ -57,7 +57,12 @@ func main() {
 	log.Fatal(err)
     }
 
-    if err := models.EnsureTextIndex(); err != nil {
+    if err := models.InitShowMongo(uri, db, "shows"); err != nil {
+	log.Fatal(err)
+    }
+
+
+    if err := models.RebuildTextIndex(); err != nil {
 	log.Fatalf("Failed to create text index: %v", err)
     }
 
@@ -74,8 +79,23 @@ func main() {
 	log.Println("No new movies to insert, skipping DB insert.")
     }
 
+    shows, err := scraper.ScrapeShows(client)
+    if err != nil {
+	log.Fatal("Show scrape failed:", err)
+    }
+    if len(shows) > 0 {
+	if err := models.InsertShows(shows); err != nil {
+	    log.Fatal("Show insert failed:", err)
+	}
+    } else {
+	log.Println("No new shows to insert.")
+    }
+
+
     api.RunServer()
 
+    // models.ClearMoviesCollection()
+    // models.ClearShowsCollection()
 
 }
 

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Movie Center - Shows</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="header">
+        <div class="header-content">
+          <div class="logo">
+            <div class="logo-icon">📺</div>
+            <div class="logo-text">Movie Center - Shows</div>
+          </div>
+          <div class="search-container">
+            <div class="search-bar">
+              <div class="search-icon">🔍</div>
+              <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Search for shows, titles, or IDs..."
+                autocomplete="off"
+              />
+              <button id="searchClear" class="search-clear">✕</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="status-bar"></div>
+
+      <main class="main-content">
+        <div id="movie-grid" class="movies-grid">
+          <div class="loading">Loading shows...</div>
+        </div>
+
+        <div class="pagination">
+          <button id="prev" class="nav-button">← Previous</button>
+          <div id="page-number" class="page-info">Page 1</div>
+          <button id="next" class="nav-button">Next →</button>
+        </div>
+      </main>
+    </div>
+
+    <script src="/static/shows.js"></script>
+  </body>
+</html>

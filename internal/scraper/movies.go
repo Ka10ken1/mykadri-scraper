@@ -16,6 +16,11 @@ import (
 
 type Movie = models.Movie
 
+type ScrapedMovieInfo struct {
+    VideoURL     string
+    TitleEnglish string
+}
+
 type Status int
 
 const (
@@ -53,7 +58,7 @@ func ScrapeMovies(client *http.Client) ([]Movie, error) {
 		movie := parseMovie(e)
 		log.Printf("Found movie: %s (%s)", movie.Title, movie.Year)
 
-		videoURL, err := scrapeVideoURL(client, movie.Link)
+		videoURL, err := scrapeMovieVideoURL(client, movie.Link)
 
 		if err != nil || videoURL == "" {
 			log.Printf("Warning: could not get video URL for %s: %v", movie.Title, err)
@@ -95,9 +100,9 @@ func ScrapeMovies(client *http.Client) ([]Movie, error) {
 
 	err = c.Limit(&colly.LimitRule{
 		DomainGlob:  "mykadri.tv",
-		Parallelism: 2,
-		Delay:       500 * time.Millisecond,
-		RandomDelay: 200 * time.Microsecond,
+		Parallelism: 1,
+		Delay:       2 * time.Second,
+		RandomDelay: 500 * time.Microsecond,
 	})
 
 	if err != nil {
@@ -108,22 +113,31 @@ func ScrapeMovies(client *http.Client) ([]Movie, error) {
 
 	baseURL := "https://mykadri.tv/filmebi_qartulad/page/%d/"
 	maxPages := 332
-
+	
 	var wg sync.WaitGroup
+	sema := make(chan struct{}, 2)
+
 	for i := 1; i <= maxPages; i++ {
+		sema <- struct{}{}
 		wg.Add(1)
+
 		go func(page int) {
-			defer wg.Done()
+			defer func() {
+				<-sema
+				wg.Done()
+			}()
 			url := fmt.Sprintf(baseURL, page)
 			if err := c.Visit(url); err != nil {
 				log.Println("Failed to visit", url, err)
 			}
 		}(i)
 	}
+
 	wg.Wait()
 	c.Wait()
 
 	return movies, nil
+
 }
 
 
@@ -148,6 +162,9 @@ func setupCollector(client *http.Client) *colly.Collector {
 
 func parseMovie(e *colly.HTMLElement) Movie {
 	title := e.DOM.Find("a.post-link.post-title-primary").AttrOr("title", "")
+
+	englishTitle := e.DOM.Find("a.post-link.post-title-secondary").AttrOr("title", "")
+
 	link := e.Request.AbsoluteURL(e.DOM.Find("a.post-link.post-title-primary").AttrOr("href", ""))
 
 	year := ""
@@ -167,15 +184,16 @@ func parseMovie(e *colly.HTMLElement) Movie {
 	}
 	imgURL = e.Request.AbsoluteURL(imgURL)
 
-	return Movie{
-		Title: title,
-		Year:  year,
-		Link:  link,
-		Image: imgURL,
+	return Movie {
+		Title:        title,
+		TitleEnglish: englishTitle,
+		Year:         year,
+		Link:         link,
+		Image:        imgURL,
 	}
 }
 
-func scrapeVideoURL(client *http.Client, moviePageURL string) (string, error) {
+func scrapeMovieVideoURL(client *http.Client, moviePageURL string) (string, error) {
 
 	resp, err := client.Get(moviePageURL)
 	if err != nil {
@@ -203,4 +221,3 @@ func scrapeVideoURL(client *http.Client, moviePageURL string) (string, error) {
 	return url, nil
 
 }
-
